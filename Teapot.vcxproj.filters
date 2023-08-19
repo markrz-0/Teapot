@@ -18,9 +18,12 @@
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="image_arr.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="image_arr.hpp">
+    <ClInclude Include="image_arr.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

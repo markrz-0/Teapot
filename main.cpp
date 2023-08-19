@@ -1,6 +1,6 @@
 #include <Windows.h>
 #include <ctime>
-#include "image_arr.hpp" 
+#include "image_arr.h" 
 
 enum OperationMode {
     SINGLE_CENTER, // single centered image
@@ -23,7 +23,7 @@ void DrawImage(int start_x, int start_y) {
         IMG_HEIGHT,
         1, // Color Planes, unfortanutelly don't know what is it actually. Let it be 1
         32, // Size of memory for one pixel in bits (in win32 4 bytes = 4*8 bits)
-        (void*) IMG_COLOR_ARR); // pointer to array
+        (void*) GetImageColorArray()); // pointer to array
     
     auto hdc = GetDC(NULL);
 
