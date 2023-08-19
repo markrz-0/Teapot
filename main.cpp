@@ -12,12 +12,19 @@ enum OperationMode {
 constexpr int SCREEN_WIDTH = 1920;
 constexpr int SCREEN_HEIGHT = 1080;
 
+constexpr bool ALLOW_MEMLEAK = false;
+
 constexpr int FPS = 15; // how many times a second should image be redrawn; higher values impact pc performance
 
 constexpr int OPERATION_MODE = OperationMode::MULTIPLE_RANDOM;
 
 
 void DrawImage(int start_x, int start_y, COLORREF* image_color_array, int image_width, int image_height) {
+    
+    if (ALLOW_MEMLEAK) {
+        image_color_array = GetImageColorArray();
+    }
+
     HBITMAP bitmap = CreateBitmap(
         image_width,
         image_height,
