@@ -17,13 +17,13 @@ constexpr int FPS = 15; // how many times a second should image be redrawn; high
 constexpr int OPERATION_MODE = OperationMode::MULTIPLE_RANDOM;
 
 
-void DrawImage(int start_x, int start_y) {
+void DrawImage(int start_x, int start_y, COLORREF* image_color_array, int image_width, int image_height) {
     HBITMAP bitmap = CreateBitmap(
-        IMG_WIDTH,
-        IMG_HEIGHT,
+        image_width,
+        image_height,
         1, // Color Planes, unfortanutelly don't know what is it actually. Let it be 1
         32, // Size of memory for one pixel in bits (in win32 4 bytes = 4*8 bits)
-        (void*) GetImageColorArray()); // pointer to array
+        (void*) image_color_array); // pointer to array
     
     auto hdc = GetDC(NULL);
 
@@ -34,13 +34,13 @@ void DrawImage(int start_x, int start_y) {
     TransparentBlt(hdc, // Destination
         start_x,  // x and
         start_y,  // y - upper-left corner of place, where we'd like to copy
-        IMG_WIDTH, // width of the region
-        IMG_HEIGHT, // height
+        image_width, // width of the region
+        image_height, // height
         src, // source
         0,   // x and
         0,   // y of upper left corner  of part of the source, from where we'd like to copy
-        IMG_WIDTH, // width of the region
-        IMG_HEIGHT, // height
+        image_width, // width of the region
+        image_height, // height
         (UINT)RGB(0, 0, 255)); // Defined key transparency color
     
     DeleteObject(bitmap);
@@ -65,21 +65,35 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 
     int sleep_time = 1000 / FPS;
 
+    COLORREF* image_pixels = GetImageColorArray();
+
     while(true) {
         switch (OPERATION_MODE) {
         case OperationMode::SINGLE_CENTER:
-            DrawImage(start_x, start_y);
+            DrawImage(
+                start_x,
+                start_y,
+                image_pixels,
+                IMG_WIDTH,
+                IMG_HEIGHT
+            );
             break;
         case OperationMode::SINGLE_RANDOM:
             DrawImage(
                 (start_x + offset_x) % MAX_X,
-                (start_y + offset_y) % MAX_Y
+                (start_y + offset_y) % MAX_Y,
+                image_pixels,
+                IMG_WIDTH,
+                IMG_HEIGHT
             );
             break;
         case OperationMode::MULTIPLE_RANDOM:
             DrawImage(
                 (start_x + offset_x) % MAX_X,
-                (start_y + offset_y) % MAX_Y
+                (start_y + offset_y) % MAX_Y,
+                image_pixels,
+                IMG_WIDTH,
+                IMG_HEIGHT
             );
             offset_x = rand();
             offset_y = rand();
