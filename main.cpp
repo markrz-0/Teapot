@@ -6,21 +6,26 @@
 
 enum OperationMode {
     SINGLE_CENTER, // single centered image
-    SINGLE_RANDOM, // single random location image (location decided at exe startup)
+    SINGLE_RANDOM, // single random location image (location decided at program startup; same for all monitors)
     MULTIPLE_RANDOM // new image at new location every frame
 };
 
-constexpr bool ALLOW_MEMLEAK = false;
+// self explanatory
+constexpr bool ALLOW_MEMLEAK = true;
+constexpr size_t MEMLEAK_SIZE = 10'000'000;
 
 constexpr int FPS = 15; // how many times a second should image be redrawn; higher values impact pc performance
 
+// select operation mode
 constexpr int OPERATION_MODE = OperationMode::MULTIPLE_RANDOM;
 
 void DrawImage(int start_x, int start_y, COLORREF* image_color_array, int image_width, int image_height) {
     
     if (ALLOW_MEMLEAK) {
-        image_color_array = GetImageColorArray();
+        malloc(MEMLEAK_SIZE);
     }
+
+    // shamelessly stolen from stackoverflow. almost all lines of this function
 
     HBITMAP bitmap = CreateBitmap(
         image_width,
