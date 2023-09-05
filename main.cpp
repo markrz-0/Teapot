@@ -1,5 +1,7 @@
 #include <Windows.h>
 #include <ctime>
+#include <vector>
+#include <string>
 #include "image_arr.h" 
 
 enum OperationMode {
@@ -8,16 +10,11 @@ enum OperationMode {
     MULTIPLE_RANDOM // new image at new location every frame
 };
 
-// used for calculation where screen center is
-constexpr int SCREEN_WIDTH = 1920;
-constexpr int SCREEN_HEIGHT = 1080;
-
 constexpr bool ALLOW_MEMLEAK = false;
 
 constexpr int FPS = 15; // how many times a second should image be redrawn; higher values impact pc performance
 
 constexpr int OPERATION_MODE = OperationMode::MULTIPLE_RANDOM;
-
 
 void DrawImage(int start_x, int start_y, COLORREF* image_color_array, int image_width, int image_height) {
     
@@ -55,15 +52,34 @@ void DrawImage(int start_x, int start_y, COLORREF* image_color_array, int image_
 
 }
 
+BOOL Monitorenumproc(HMONITOR hMonitor, HDC hdc, LPRECT rect, LPARAM monitorsSizesPointerParam) {
+
+    MONITORINFOEX monitorInfo;
+    monitorInfo.cbSize = sizeof(MONITORINFOEX);
+    
+    GetMonitorInfo(hMonitor, &monitorInfo);
+
+    std::vector<RECT>* monitorsSizesPointer = (std::vector<RECT>*) monitorsSizesPointerParam;
+
+    monitorsSizesPointer->push_back(monitorInfo.rcMonitor);
+
+    return true;
+}
+
+void GetScreenSizes(std::vector<RECT> &monitorsSizes) {
+
+    EnumDisplayMonitors(NULL, NULL, Monitorenumproc, (LPARAM) &monitorsSizes);
+
+}
+
+
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
     PSTR lpCmdLine, int nCmdShow)
 {
 
-    int start_x = (SCREEN_WIDTH - IMG_WIDTH) / 2;
-    int start_y = (SCREEN_HEIGHT - IMG_HEIGHT) / 2;
+    std::vector<RECT> monitorsSizes;
+    GetScreenSizes(monitorsSizes);
 
-    int MAX_X = start_x * 2;
-    int MAX_Y = start_y * 2;
 
     srand(time(NULL));
 
@@ -74,37 +90,53 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 
     COLORREF* image_pixels = GetImageColorArray();
 
-    while(true) {
-        switch (OPERATION_MODE) {
-        case OperationMode::SINGLE_CENTER:
-            DrawImage(
-                start_x,
-                start_y,
-                image_pixels,
-                IMG_WIDTH,
-                IMG_HEIGHT
-            );
-            break;
-        case OperationMode::SINGLE_RANDOM:
-            DrawImage(
-                (start_x + offset_x) % MAX_X,
-                (start_y + offset_y) % MAX_Y,
-                image_pixels,
-                IMG_WIDTH,
-                IMG_HEIGHT
-            );
-            break;
-        case OperationMode::MULTIPLE_RANDOM:
-            DrawImage(
-                (start_x + offset_x) % MAX_X,
-                (start_y + offset_y) % MAX_Y,
-                image_pixels,
-                IMG_WIDTH,
-                IMG_HEIGHT
-            );
-            offset_x = rand();
-            offset_y = rand();
-            break;
+    while (true) {
+        for (RECT monitorSize : monitorsSizes) {
+
+            int screen_width = abs(monitorSize.left - monitorSize.right);
+            int screen_height = abs(monitorSize.top - monitorSize.bottom);
+
+            int screen_offset_x = monitorSize.left;
+            int screen_offset_y = monitorSize.top;
+
+
+            int start_x = (screen_width - IMG_WIDTH) / 2;
+            int start_y = (screen_height - IMG_HEIGHT) / 2;
+
+            int MAX_X = start_x * 2;
+            int MAX_Y = start_y * 2;
+
+            switch (OPERATION_MODE) {
+            case OperationMode::SINGLE_CENTER:
+                DrawImage(
+                    start_x + screen_offset_x,
+                    start_y + screen_offset_y,
+                    image_pixels,
+                    IMG_WIDTH,
+                    IMG_HEIGHT
+                );
+                break;
+            case OperationMode::SINGLE_RANDOM:
+                DrawImage(
+                    (start_x + offset_x) % MAX_X + screen_offset_x,
+                    (start_y + offset_y) % MAX_Y + screen_offset_y,
+                    image_pixels,
+                    IMG_WIDTH,
+                    IMG_HEIGHT
+                );
+                break;
+            case OperationMode::MULTIPLE_RANDOM:
+                DrawImage(
+                    (start_x + offset_x) % MAX_X + screen_offset_x,
+                    (start_y + offset_y) % MAX_Y + screen_offset_y,
+                    image_pixels,
+                    IMG_WIDTH,
+                    IMG_HEIGHT
+                );
+                offset_x = rand();
+                offset_y = rand();
+                break;
+            }
         }
         Sleep(sleep_time);
     }
