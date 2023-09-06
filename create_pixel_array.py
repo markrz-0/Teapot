@@ -1,18 +1,18 @@
 from PIL import Image
 
-TRANSPARENT_COLOR = 255 # just blue
+TRANSPARENT_COLOR = 0xff00ff
 
 def rgba_to_color_ref_number(r, g, b, a):
     if a < 240:
         return TRANSPARENT_COLOR
 
-    return  b * 256 * 256 +\
+    return  r * 256 * 256 +\
         g * 256 +\
-        r
+        b
 
 width = 600
 
-img = Image.open('teapot.png')
+img = Image.open('minecraft.png')
 print("MODE", img.mode)
 original_size = img.size
 

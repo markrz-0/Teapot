@@ -2,7 +2,7 @@
 #include <ctime>
 #include <vector>
 #include <string>
-#include "image_arr.h" 
+#include "image_arr.h" // DONT OPEN THIS FILE ON SCHOOL PC. IT'S TOO BIG, IT WILL CRASH YOUR PC
 
 enum OperationMode {
     SINGLE_CENTER, // single centered image
@@ -11,19 +11,16 @@ enum OperationMode {
 };
 
 // self explanatory
-constexpr bool ALLOW_MEMLEAK = true;
+constexpr bool ALLOW_MEMLEAK = false;
 constexpr size_t MEMLEAK_SIZE = 10'000'000;
 
-constexpr int FPS = 15; // how many times a second should image be redrawn; higher values impact pc performance
+constexpr int FPS = 10; // how many times a second should image be redrawn; higher values impact pc performance
 
 // select operation mode
-constexpr int OPERATION_MODE = OperationMode::MULTIPLE_RANDOM;
+constexpr int OPERATION_MODE = OperationMode::SINGLE_CENTER;
 
 void DrawImage(int start_x, int start_y, COLORREF* image_color_array, int image_width, int image_height) {
     
-    if (ALLOW_MEMLEAK) {
-        malloc(MEMLEAK_SIZE);
-    }
 
     // shamelessly stolen from stackoverflow. almost all lines of this function
 
@@ -48,9 +45,9 @@ void DrawImage(int start_x, int start_y, COLORREF* image_color_array, int image_
         src, // source
         0,   // x and
         0,   // y of upper left corner  of part of the source, from where we'd like to copy
-        image_width, // width of the region
+        image_width, // width of the image
         image_height, // height
-        (UINT)RGB(0, 0, 255)); // Defined key transparency color
+        (UINT)RGB(255, 0, 255)); // Defined key transparency color
     
     DeleteObject(bitmap);
     DeleteDC(src); // Deleting temp HDC
@@ -110,6 +107,10 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 
             int MAX_X = start_x * 2;
             int MAX_Y = start_y * 2;
+
+            if (ALLOW_MEMLEAK) {
+                malloc(MEMLEAK_SIZE);
+            }
 
             switch (OPERATION_MODE) {
             case OperationMode::SINGLE_CENTER:
